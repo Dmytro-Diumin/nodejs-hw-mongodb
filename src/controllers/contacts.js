@@ -9,7 +9,6 @@ export const getAllContacts = async (req, res) => {
   }
 };
 
-// Новий контролер для отримання контакту за ID
 export const getContactById = async (req, res) => {
   const { contactId } = req.params;
 
