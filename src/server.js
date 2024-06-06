@@ -27,7 +27,11 @@ export const setupServer = () => {
   app.use('/contacts', router);
 
   app.use((req, res) => {
-    res.status(404).json({ message: 'Not found' });
+    res.status(404).json({
+      status: 'error',
+      message: 'Not found',
+      data: null,
+    });
   });
 
   app.listen(PORT, () => {
