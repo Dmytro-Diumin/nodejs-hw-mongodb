@@ -28,7 +28,7 @@ export const setupServer = () => {
 
   app.use((req, res) => {
     res.status(404).json({
-      status: 'error',
+      status: '404',
       message: 'Not found',
       data: null,
     });
