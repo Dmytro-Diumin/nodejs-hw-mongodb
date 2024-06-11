@@ -6,6 +6,7 @@ import router from './routers/contacts.js';
 import { env } from './utils/env.js';
 import { ENV_VARS } from './сontact/index.js';
 import createHttpError from 'http-errors';
+import { deleteContact } from './services/contacts.js';
 
 dotenv.config();
 const PORT = env(ENV_VARS.PORT, 3000);
@@ -31,7 +32,7 @@ export const setupServer = () => {
     next(createHttpError(404, 'Route not found'));
   };
 
-  const errorHandler = (err, req, res, next) => {
+  const errorHandler = (err, req, res) => {
     if (err.name === 'CastError') {
       res.status(400).json({
         status: 400,
@@ -53,6 +54,7 @@ export const setupServer = () => {
 
   app.use(notFoundHandler);
   app.use(errorHandler);
+  app.delete('/contacts/:contactId', deleteContact);
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

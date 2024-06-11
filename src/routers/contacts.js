@@ -1,7 +1,12 @@
 import express from 'express';
-import { getAllContacts, getContactById } from '../controllers/contacts.js';
+import {
+  createContact,
+  getAllContacts,
+  getContactByIdController,
+  updateContact,
+} from '../controllers/contacts.js';
 import createHttpError from 'http-errors';
-import mongoose from 'mongoose';
+import { deleteContact } from '../services/contacts.js';
 
 const router = express.Router();
 
@@ -17,23 +22,18 @@ const ctrlWrapper = (ctrl) => {
 
 router.get('/', ctrlWrapper(getAllContacts));
 
-router.get(
+router.get('/contacts/:contactId', getContactByIdController);
+
+router.post('/', ctrlWrapper(createContact));
+router.patch('/:contactId', updateContact);
+router.delete(
   '/:contactId',
   ctrlWrapper(async (req, res, next) => {
     const { contactId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(contactId)) {
-      return next(
-        createHttpError(400, {
-          status: 400,
-          message: 'Invalid contact ID',
-          data: { message: 'Invalid contact ID format' },
-        }),
-      );
-    }
+    const deletedContact = await deleteContact(contactId);
 
-    const contact = await getContactById(contactId);
-    if (!contact) {
+    if (!deletedContact) {
       return next(
         createHttpError(404, {
           status: 404,
@@ -42,11 +42,8 @@ router.get(
         }),
       );
     }
-    res.json({
-      status: 200,
-      message: `Successfully found contact with id ${contactId}!`,
-      data: contact,
-    });
+
+    res.sendStatus(204);
   }),
 );
 
