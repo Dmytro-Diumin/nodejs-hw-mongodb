@@ -1,12 +1,11 @@
 import createHttpError from 'http-errors';
-import Contact from '../models/contact.js';
 import {
   createContactService,
+  deleteContactByIdService,
   getAllContactsService,
   getContactByIdService,
-  updateContactById,
+  updateContactByIdService,
 } from '../services/contacts.js';
-import mongoose from 'mongoose';
 
 export const getAllContacts = async (req, res) => {
   try {
@@ -28,7 +27,8 @@ export const getAllContacts = async (req, res) => {
 export const getContactByIdController = async (req, res, next) => {
   const { contactId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {
+  // Перевірка валідності формату ID (якщо використовується MongoDB, можна використовувати регулярний вираз для ObjectId)
+  if (!/^[0-9a-fA-F]{24}$/.test(contactId)) {
     return next(
       createHttpError(400, {
         status: 400,
@@ -38,21 +38,26 @@ export const getContactByIdController = async (req, res, next) => {
     );
   }
 
-  const contact = await getContactByIdService(contactId);
-  if (!contact) {
-    return next(
-      createHttpError(404, {
-        status: 404,
-        message: 'Contact not found',
-        data: { message: 'Contact not found' },
-      }),
-    );
+  try {
+    const contact = await getContactByIdService(contactId);
+    if (!contact) {
+      return next(
+        createHttpError(404, {
+          status: 404,
+          message: 'Contact not found',
+          data: { message: 'Contact not found' },
+        }),
+      );
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: `Successfully found contact with id ${contactId}!`,
+      data: contact,
+    });
+  } catch (error) {
+    next(error);
   }
-  res.json({
-    status: 200,
-    message: `Successfully found contact with id ${contactId}!`,
-    data: contact,
-  });
 };
 
 export const createContact = async (req, res) => {
@@ -68,7 +73,7 @@ export const updateContact = async (req, res, next) => {
   const { contactId } = req.params;
   const { name, phoneNumber, email, isFavourite, contactType } = req.body;
 
-  const updatedContact = await updateContactById(contactId, {
+  const updatedContact = await updateContactByIdService(contactId, {
     name,
     phoneNumber,
     email,
@@ -93,16 +98,17 @@ export const updateContact = async (req, res, next) => {
   });
 };
 
-export const deleteContact = async (req, res) => {
-  const contact = await Contact.findByIdAndDelete(req.params.contactId);
-  if (!contact) {
-    throw createHttpError(404, { message: 'Contact not found' });
-  }
+export const deleteContact = async (req, res, next) => {
+  try {
+    const { contactId } = req.params;
+    const result = await deleteContactByIdService(contactId);
+    const { NotFound } = createHttpError;
+    if (!result) {
+      throw new NotFound('Contact not found');
+    }
 
-  const contacts = await getAllContactsService();
-  res.status(204).json({
-    status: 204,
-    message: 'Contact deleted successfully',
-    data: contacts,
-  });
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
 };
