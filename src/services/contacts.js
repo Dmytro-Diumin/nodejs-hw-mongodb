@@ -6,7 +6,8 @@ export const getAllContactsService = async () => {
 };
 
 export const getContactByIdService = async (contactId) => {
-  return await Contact.findById(contactId);
+  const contact = await Contact.findById(contactId);
+  return contact;
 };
 
 export const createContactService = async (payload) => {
@@ -32,7 +33,7 @@ export const createContactService = async (payload) => {
   return newContact;
 };
 
-export const updateContactById = async (id, updatedFields) => {
+export const updateContactByIdService = async (id, updatedFields) => {
   const updatedContact = await Contact.findByIdAndUpdate(
     id,
     { $set: updatedFields },
@@ -42,6 +43,7 @@ export const updateContactById = async (id, updatedFields) => {
   return updatedContact;
 };
 
-export const deleteContact = async (contactId) => {
-  return await Contact.findByIdAndDelete(contactId);
+export const deleteContactByIdService = async (contactId) => {
+  const result = await Contact.findByIdAndDelete(contactId);
+  return result;
 };
