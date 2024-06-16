@@ -6,6 +6,7 @@ import {
   getContactByIdService,
   updateContactByIdService,
 } from '../services/contacts.js';
+import mongoose from 'mongoose';
 
 export const getAllContacts = async (req, res) => {
   try {
@@ -27,13 +28,12 @@ export const getAllContacts = async (req, res) => {
 export const getContactByIdController = async (req, res, next) => {
   const { contactId } = req.params;
 
-  // Перевірка валідності формату ID (якщо використовується MongoDB, можна використовувати регулярний вираз для ObjectId)
-  if (!/^[0-9a-fA-F]{24}$/.test(contactId)) {
+  if (!mongoose.Types.ObjectId.isValid(contactId)) {
     return next(
       createHttpError(400, {
         status: 400,
-        message: 'Invalid contact ID',
-        data: { message: 'Invalid contact ID format' },
+        message: 'Invalid contact ID format',
+        data: { message: `Invalid _id: ${contactId}` },
       }),
     );
   }
