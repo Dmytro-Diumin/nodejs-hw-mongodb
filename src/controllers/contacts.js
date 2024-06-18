@@ -2,26 +2,71 @@ import createHttpError from 'http-errors';
 import {
   createContactService,
   deleteContactByIdService,
-  getAllContactsService,
   getContactByIdService,
+  getContactsService,
   updateContactByIdService,
 } from '../services/contacts.js';
 import mongoose from 'mongoose';
 
-export const getAllContacts = async (req, res) => {
+export const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await getAllContactsService();
+    const {
+      page = 1,
+      perPage = 10,
+      sortBy = 'name',
+      sortOrder = 'asc',
+      type,
+      isFavourite,
+    } = req.query;
+    const pageNumber = parseInt(page, 10);
+    const perPageNumber = parseInt(perPage, 10);
+
+    if (
+      isNaN(pageNumber) ||
+      isNaN(perPageNumber) ||
+      pageNumber < 1 ||
+      perPageNumber < 1
+    ) {
+      return next(createHttpError(400, 'Invalid pagination parameters'));
+    }
+
+    if (sortOrder !== 'asc' && sortOrder !== 'desc') {
+      return next(
+        createHttpError(
+          400,
+          'Invalid sortOrder parameter. Use "asc" or "desc"',
+        ),
+      );
+    }
+
+    const { contacts, totalItems } = await getContactsService(
+      pageNumber,
+      perPageNumber,
+      sortBy,
+      sortOrder,
+      type,
+      isFavourite,
+    );
+
+    const totalPages = Math.ceil(totalItems / perPageNumber);
+    const hasPreviousPage = pageNumber > 1;
+    const hasNextPage = pageNumber < totalPages;
+
     res.status(200).json({
-      status: '200',
+      status: 200,
       message: 'Successfully found contacts!',
-      data: contacts,
+      data: {
+        data: contacts,
+        page: pageNumber,
+        perPage: perPageNumber,
+        totalItems,
+        totalPages,
+        hasPreviousPage,
+        hasNextPage,
+      },
     });
   } catch (error) {
-    res.status(500).json({
-      status: '500',
-      message: 'Server error',
-      data: error,
-    });
+    next(error);
   }
 };
 
@@ -60,13 +105,18 @@ export const getContactByIdController = async (req, res, next) => {
   }
 };
 
-export const createContact = async (req, res) => {
-  const newContact = await createContactService(req.body);
-  res.json({
-    status: 201,
-    message: 'Successfully created a contact!',
-    data: newContact,
-  });
+export const createContact = async (req, res, next) => {
+  try {
+    const { name, email, phone } = req.body;
+    const newContact = await createContactService({ name, email, phone });
+    res.status(201).json({
+      status: 201,
+      message: 'Contact created successfully',
+      data: newContact,
+    });
+  } catch (error) {
+    next(createHttpError(500, error.message));
+  }
 };
 
 export const updateContact = async (req, res, next) => {

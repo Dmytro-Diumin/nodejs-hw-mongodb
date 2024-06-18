@@ -6,8 +6,6 @@ import router from './routers/contacts.js';
 import { env } from './utils/env.js';
 import { ENV_VARS } from './сontact/index.js';
 import createHttpError from 'http-errors';
-import { deleteContactByIdService } from './services/contacts.js';
-import { getContactByIdController } from './controllers/contacts.js';
 
 dotenv.config();
 const PORT = env(ENV_VARS.PORT, 3000);
@@ -53,9 +51,6 @@ export const setupServer = () => {
 
   app.use(notFoundHandler);
   app.use(errorHandler);
-
-  app.get('/contacts/:contactId', getContactByIdController);
-  app.delete('/contacts/:contactId', deleteContactByIdService);
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
