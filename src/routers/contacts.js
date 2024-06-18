@@ -6,6 +6,11 @@ import {
   getContactByIdController,
   updateContact,
 } from '../controllers/contacts.js';
+import { validateBody } from '../middlewares/validateBody.js';
+import {
+  contactSchema,
+  updateContactSchema,
+} from '../schemas/contactSchemas.js';
 
 const router = express.Router();
 
@@ -23,8 +28,8 @@ router.get('/', ctrlWrapper(getAllContacts));
 
 router.get('/:contactId', ctrlWrapper(getContactByIdController));
 
-router.post('/', ctrlWrapper(createContact));
-router.patch('/:contactId', updateContact);
+router.post('/', validateBody(contactSchema), ctrlWrapper(createContact));
+router.patch('/:contactId', validateBody(updateContactSchema), updateContact);
 router.delete('/:contactId', ctrlWrapper(deleteContact));
 
 export default router;

@@ -1,8 +1,31 @@
-import createHttpError from 'http-errors';
 import Contact from '../models/contact.js';
 
-export const getAllContactsService = async () => {
-  return await Contact.find();
+export const getContactsService = async (
+  page,
+  perPage,
+  sortBy,
+  sortOrder,
+  type,
+  isFavourite,
+) => {
+  const skip = (page - 1) * perPage;
+  const sortOptions = {};
+  sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
+  const query = {};
+  if (type) {
+    query.contactType = type;
+  }
+  if (isFavourite) {
+    query.isFavourite = isFavourite === 'true';
+  }
+
+  const [contacts, totalItems] = await Promise.all([
+    Contact.find(query).skip(skip).limit(perPage).sort(sortOptions),
+    Contact.countDocuments(query),
+  ]);
+
+  return { contacts, totalItems };
 };
 
 export const getContactByIdService = async (contactId) => {
@@ -10,27 +33,10 @@ export const getContactByIdService = async (contactId) => {
   return contact;
 };
 
-export const createContactService = async (payload) => {
-  const { name, phoneNumber, email, isFavourite, contactType } = payload;
-
-  if (!name || !phoneNumber) {
-    throw createHttpError(400, {
-      status: 400,
-      message: 'Bad Request',
-      data: { message: 'Name and phone number are required' },
-    });
-  }
-
-  const newContact = new Contact({
-    name,
-    phoneNumber,
-    email,
-    isFavourite,
-    contactType,
-  });
-
-  await newContact.save();
-  return newContact;
+export const createContactService = async (contactData) => {
+  const contact = new Contact(contactData);
+  await contact.save();
+  return contact;
 };
 
 export const updateContactByIdService = async (id, updatedFields) => {

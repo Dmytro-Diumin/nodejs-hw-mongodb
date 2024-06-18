@@ -4,21 +4,20 @@ const contactSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
-    },
-    phoneNumber: {
-      type: String,
-      required: true,
+      required: [true, 'Name is required'],
+      minlength: 3,
+      maxlength: 20,
     },
     email: {
       type: String,
+      required: [true, 'Email is required'],
+      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
-    isFavourite: {
-      type: Boolean,
-      default: false,
-    },
-    contactType: {
+    phone: {
       type: String,
+      required: [true, 'Phone number is required'],
+      minlength: 3,
+      maxlength: 20,
     },
   },
   {
