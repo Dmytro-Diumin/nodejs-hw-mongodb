@@ -8,16 +8,25 @@ const contactSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 20,
     },
-    email: {
-      type: String,
-      required: [true, 'Email is required'],
-      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    },
-    phone: {
+    phoneNumber: {
       type: String,
       required: [true, 'Phone number is required'],
       minlength: 3,
       maxlength: 20,
+    },
+    email: {
+      type: String,
+      minlength: 3,
+      maxlength: 50,
+    },
+    isFavourite: {
+      type: Boolean,
+      default: false,
+    },
+    contactType: {
+      type: String,
+      enum: ['family', 'friend', 'work', 'other'],
+      default: 'other',
     },
   },
   {
