@@ -107,15 +107,25 @@ export const getContactByIdController = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const { name, email, phone } = req.body;
-    const newContact = await createContactService({ name, email, phone });
+    const { name, email, phoneNumber, contactType, isFavourite } = req.body;
+    const newContact = await createContactService({
+      name,
+      email,
+      phoneNumber,
+      contactType,
+      isFavourite,
+    });
     res.status(201).json({
       status: 201,
       message: 'Contact created successfully',
       data: newContact,
     });
   } catch (error) {
-    next(createHttpError(500, error.message));
+    if (error.name === 'ValidationError') {
+      next(createHttpError(400, error.message));
+    } else {
+      next(createHttpError(500, error.message));
+    }
   }
 };
 

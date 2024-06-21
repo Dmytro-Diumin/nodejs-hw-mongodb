@@ -33,10 +33,22 @@ export const getContactByIdService = async (contactId) => {
   return contact;
 };
 
-export const createContactService = async (contactData) => {
-  const contact = new Contact(contactData);
-  await contact.save();
-  return contact;
+export const createContactService = async ({
+  name,
+  email,
+  phoneNumber,
+  contactType,
+  isFavourite,
+}) => {
+  const newContact = new Contact({
+    name,
+    email,
+    phoneNumber,
+    contactType,
+    isFavourite,
+  });
+  await newContact.save();
+  return newContact;
 };
 
 export const updateContactByIdService = async (id, updatedFields) => {
