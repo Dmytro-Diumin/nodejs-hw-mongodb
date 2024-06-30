@@ -39,7 +39,7 @@ contactRouter.post(
 contactRouter.patch(
   '/:contactId',
   validateBody(updateContactSchema),
-  updateContact,
+  ctrlWrapper(updateContact),
 );
 contactRouter.delete('/:contactId', ctrlWrapper(deleteContact));
 

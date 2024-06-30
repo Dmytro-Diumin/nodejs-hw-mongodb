@@ -1,6 +1,7 @@
 import Contact from '../models/contact.js';
 
 export const getContactsService = async (
+  userId,
   page,
   perPage,
   sortBy,
@@ -12,7 +13,7 @@ export const getContactsService = async (
   const sortOptions = {};
   sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
-  const query = {};
+  const query = { userId };
   if (type) {
     query.contactType = type;
   }
@@ -28,8 +29,8 @@ export const getContactsService = async (
   return { contacts, totalItems };
 };
 
-export const getContactByIdService = async (contactId) => {
-  const contact = await Contact.findById(contactId);
+export const getContactByIdService = async (userId, contactId) => {
+  const contact = await Contact.findById({ _id: contactId, userId: userId });
   return contact;
 };
 
@@ -39,6 +40,7 @@ export const createContactService = async ({
   phoneNumber,
   contactType,
   isFavourite,
+  userId,
 }) => {
   const newContact = new Contact({
     name,
@@ -46,14 +48,35 @@ export const createContactService = async ({
     phoneNumber,
     contactType,
     isFavourite,
+    userId,
   });
   await newContact.save();
   return newContact;
 };
 
-export const updateContactByIdService = async (id, updatedFields) => {
+export const getContactByUserId = async (userId) => {
+  try {
+    const contact = await Contact.findOne({ userId: userId });
+    return contact;
+  } catch (error) {
+    console.error('Error fetching contact by userId:', error);
+    throw error;
+  }
+};
+
+export const getContactsByUserId = async (userId) => {
+  try {
+    const contacts = await Contact.find({ userId: userId });
+    return contacts;
+  } catch (error) {
+    console.error('Error fetching contacts by userId:', error);
+    throw error;
+  }
+};
+
+export const updateContactByIdService = async (userId, id, updatedFields) => {
   const updatedContact = await Contact.findByIdAndUpdate(
-    id,
+    { _id: id, userId },
     { $set: updatedFields },
     { new: true },
   );
@@ -61,7 +84,7 @@ export const updateContactByIdService = async (id, updatedFields) => {
   return updatedContact;
 };
 
-export const deleteContactByIdService = async (contactId) => {
-  const result = await Contact.findByIdAndDelete(contactId);
+export const deleteContactByIdService = async (userId, contactId) => {
+  const result = await Contact.findByIdAndDelete({ _id: contactId, userId });
   return result;
 };
