@@ -7,6 +7,7 @@ import {
   updateContactByIdService,
 } from '../services/contacts.js';
 import mongoose from 'mongoose';
+import Contact from '../models/contact.js';
 
 export const getAllContacts = async (req, res, next) => {
   try {
@@ -103,6 +104,26 @@ export const getContactByIdController = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const getContactsByUserId = async (userId) => {
+  try {
+    const contacts = await Contact.find({ userId: userId });
+    return contacts;
+  } catch (error) {
+    console.error('Error fetching contacts by userId:', error);
+    throw error;
+  }
+};
+
+export const getContactByUserId = async (userId, contactId) => {
+  try {
+    const contact = await Contact.findOne({ _id: contactId, userId: userId });
+    return contact;
+  } catch (error) {
+    console.error('Error fetching contact by userId:', error);
+    throw error;
   }
 };
 

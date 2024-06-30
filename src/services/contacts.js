@@ -54,30 +54,14 @@ export const createContactService = async ({
   return newContact;
 };
 
-export const getContactByUserId = async (userId) => {
-  try {
-    const contact = await Contact.findOne({ userId: userId });
-    return contact;
-  } catch (error) {
-    console.error('Error fetching contact by userId:', error);
-    throw error;
-  }
-};
-
-export const getContactsByUserId = async (userId) => {
-  try {
-    const contacts = await Contact.find({ userId: userId });
-    return contacts;
-  } catch (error) {
-    console.error('Error fetching contacts by userId:', error);
-    throw error;
-  }
-};
-
-export const updateContactByIdService = async (userId, id, updatedFields) => {
+export const updateContactByIdService = async (
+  userId,
+  contactId,
+  updateData,
+) => {
   const updatedContact = await Contact.findByIdAndUpdate(
-    { _id: id, userId },
-    { $set: updatedFields },
+    { _id: contactId, userId },
+    updateData,
     { new: true },
   );
 
@@ -85,6 +69,5 @@ export const updateContactByIdService = async (userId, id, updatedFields) => {
 };
 
 export const deleteContactByIdService = async (userId, contactId) => {
-  const result = await Contact.findByIdAndDelete({ _id: contactId, userId });
-  return result;
+  return await Contact.findOneAndDelete({ _id: contactId, userId });
 };
