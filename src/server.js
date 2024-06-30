@@ -2,10 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
 import dotenv from 'dotenv';
-import router from './routers/contacts.js';
+import cookieParser from 'cookie-parser';
 import { env } from './utils/env.js';
 import { ENV_VARS } from './сontact/index.js';
 import createHttpError from 'http-errors';
+import contactRouter from './routers/contacts.js';
+import authRouter from './routers/auth.js';
 
 dotenv.config();
 const PORT = env(ENV_VARS.PORT, 3000);
@@ -17,6 +19,8 @@ export const setupServer = () => {
 
   app.use(cors());
 
+  app.use(cookieParser());
+
   app.use(
     pino({
       transport: {
@@ -25,7 +29,8 @@ export const setupServer = () => {
     }),
   );
 
-  app.use('/contacts', router);
+  app.use('/contacts', contactRouter);
+  app.use('/auth', authRouter);
 
   const notFoundHandler = (req, res, next) => {
     next(createHttpError(404, 'Route not found'));
