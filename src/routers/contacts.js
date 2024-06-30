@@ -11,8 +11,11 @@ import {
   contactSchema,
   updateContactSchema,
 } from '../schemas/contactSchemas.js';
+import authenticate from '../middlewares/authenticate.js';
 
-const router = express.Router();
+const contactRouter = express.Router();
+
+contactRouter.use(authenticate);
 
 const ctrlWrapper = (ctrl) => {
   return async (req, res, next) => {
@@ -24,12 +27,20 @@ const ctrlWrapper = (ctrl) => {
   };
 };
 
-router.get('/', ctrlWrapper(getAllContacts));
+contactRouter.get('/', ctrlWrapper(getAllContacts));
 
-router.get('/:contactId', ctrlWrapper(getContactByIdController));
+contactRouter.get('/:contactId', ctrlWrapper(getContactByIdController));
 
-router.post('/', validateBody(contactSchema), ctrlWrapper(createContact));
-router.patch('/:contactId', validateBody(updateContactSchema), updateContact);
-router.delete('/:contactId', ctrlWrapper(deleteContact));
+contactRouter.post(
+  '/',
+  validateBody(contactSchema),
+  ctrlWrapper(createContact),
+);
+contactRouter.patch(
+  '/:contactId',
+  validateBody(updateContactSchema),
+  updateContact,
+);
+contactRouter.delete('/:contactId', ctrlWrapper(deleteContact));
 
-export default router;
+export default contactRouter;

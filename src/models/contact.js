@@ -2,13 +2,18 @@ import mongoose from 'mongoose';
 
 const contactSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     name: {
       type: String,
       required: [true, 'Name is required'],
       minlength: 3,
       maxlength: 20,
     },
-    phoneNumber: {
+    phone: {
       type: String,
       required: [true, 'Phone number is required'],
       minlength: 3,
