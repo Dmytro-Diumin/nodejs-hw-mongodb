@@ -59,7 +59,7 @@ export const updateContactByIdService = async (
   contactId,
   updateData,
 ) => {
-  const updatedContact = await Contact.findByIdAndUpdate(
+  const updatedContact = await Contact.findOneAndUpdate(
     { _id: contactId, userId },
     updateData,
     { new: true },
