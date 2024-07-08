@@ -1,16 +1,19 @@
 import jwt from 'jsonwebtoken';
 import createHttpError from 'http-errors';
-import User from '../models/user.js';
+import { User } from '../models/user.js';
 import Session from '../models/session.js';
 
 const authenticate = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.get('Authorization');
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return next(createHttpError(401, 'No token provided'));
   }
 
   const token = authHeader.split(' ')[1];
+  if (!token) {
+    return next(createHttpError(401, 'Auth header should be of bearer type'));
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);

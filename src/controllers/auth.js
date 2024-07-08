@@ -4,7 +4,13 @@ import {
   logoutUserService,
   refreshSessionService,
   registerUserService,
+  requestResetToken,
 } from '../services/auth.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { User } from '../models/user.js';
+import { env } from '../utils/env.js';
+import { ENV_VARS } from '../сontact/index.js';
 
 export const registerUser = async (req, res, next) => {
   try {
@@ -27,29 +33,14 @@ export const registerUser = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    const { accessToken, refreshToken } = await loginUserService({
-      email,
-      password,
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-
-    res.status(200).json({
+    const tokens = await loginUserService(req.body);
+    res.json({
       status: 200,
       message: 'Successfully logged in an user!',
-      data: { accessToken },
+      data: tokens,
     });
   } catch (error) {
-    if (error.status === 401) {
-      next(createHttpError(401, 'Invalid email or password'));
-    } else {
-      next(createHttpError(500, error.message));
-    }
+    next(error);
   }
 };
 
@@ -93,4 +84,57 @@ export const logoutUser = async (req, res, next) => {
   } catch (error) {
     next(createHttpError(500, error.message));
   }
+};
+
+export const requestResetEmailController = async (req, res) => {
+  try {
+    await requestResetToken(req.body.email);
+
+    res.json({
+      message: 'Reset password email was successfully sent',
+      status: 200,
+      data: {},
+    });
+  } catch (error) {
+    console.error('Error requesting reset email:', error);
+    res.status(500).json({
+      message: 'Failed to send reset password email',
+      status: 500,
+      data: {},
+    });
+  }
+};
+
+export const resetPassword = async (userData) => {
+  let entries;
+
+  try {
+    entries = jwt.verify(userData.token, env(ENV_VARS.JWT_SECRET));
+  } catch (error) {
+    if (error instanceof Error) throw createHttpError(401, error.message);
+    throw error;
+  }
+
+  const user = await User.findOne({
+    email: entries.email,
+    _id: entries.sub,
+  });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  const encryptedPassword = await bcrypt.hash(userData.password, 10);
+
+  await User.updateOne({ _id: user._id }, { password: encryptedPassword });
+};
+
+export const resetPasswordController = async (req, res) => {
+  await resetPassword(req.body);
+
+  res.status(200).json({
+    status: res.status,
+    message: 'Password has been successfully reset.',
+    data: {},
+  });
 };

@@ -1,8 +1,14 @@
 import bcrypt from 'bcrypt';
-import User from '../models/user.js';
+import { User } from '../models/user.js';
 import Session from '../models/session.js';
 import jwt from 'jsonwebtoken';
 import createHttpError from 'http-errors';
+import { sendEmail } from '../utils/sendEmail.js';
+import { EMAIL_VARS, ENV_VARS, TEMPLATES_DIR } from '../сontact/index.js';
+import { env } from '../utils/env.js';
+import fs from 'fs/promises';
+import handlebars from 'handlebars';
+import path from 'path';
 
 export const registerUserService = async ({ name, email, password }) => {
   const existingUser = await User.findOne({ email });
@@ -38,23 +44,34 @@ const generateRefreshToken = (userId) => {
   });
 };
 
-export const loginUserService = async ({ email, password }) => {
-  const user = await User.findOne({ email });
+export const loginUserService = async (userData) => {
+  const user = await User.findOne({ email: userData.email });
   if (!user) {
-    throw createHttpError(401, 'Invalid email or password');
+    throw createHttpError(401, 'User not found');
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  const isPasswordValid = await bcrypt.compare(
+    userData.password,
+    user.password,
+  );
   if (!isPasswordValid) {
-    throw createHttpError(401, 'Invalid email or password');
+    throw createHttpError(401, 'Unauthorized');
   }
 
-  const accessToken = generateAccessToken(user._id);
-  const refreshToken = generateRefreshToken(user._id);
+  const accessToken = jwt.sign(
+    { userId: user._id },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: '15m' },
+  );
+  const refreshToken = jwt.sign(
+    { userId: user._id },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: '30d' },
+  );
 
-  await Session.findOneAndDelete({ userId: user._id });
+  await Session.deleteOne({ userId: user._id });
 
-  const session = new Session({
+  await Session.create({
     userId: user._id,
     accessToken,
     refreshToken,
@@ -62,9 +79,7 @@ export const loginUserService = async ({ email, password }) => {
     refreshTokenValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
-  await session.save();
-
-  return { accessToken, refreshToken };
+  return { accessToken };
 };
 
 export const refreshSessionService = async (refreshToken) => {
@@ -105,4 +120,54 @@ export const logoutUserService = async (refreshToken) => {
   }
 
   await Session.deleteOne({ refreshToken });
+};
+
+export const requestResetToken = async (email) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    env(ENV_VARS.JWT_SECRET),
+    {
+      expiresIn: '5m',
+    },
+  );
+
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR,
+    'send-reset-password-email.html',
+  );
+
+  const templateSource = (
+    await fs.readFile(resetPasswordTemplatePath)
+  ).toString();
+
+  const template = handlebars.compile(templateSource);
+
+  const html = template({
+    name: user.name,
+    link: `${env(ENV_VARS.APP_DOMAIN)}/reset-password?token=${resetToken}`,
+  });
+
+  try {
+    await sendEmail({
+      from: env(EMAIL_VARS.SMTP_FROM),
+      to: email,
+      subject: 'Reset your password',
+      html,
+    });
+  } catch (error) {
+    console.log('Failed to send email:', error);
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later',
+    );
+  }
 };
