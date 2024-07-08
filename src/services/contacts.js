@@ -34,40 +34,31 @@ export const getContactByIdService = async (userId, contactId) => {
   return contact;
 };
 
-export const createContactService = async ({
-  name,
-  email,
-  phoneNumber,
-  contactType,
-  isFavourite,
-  userId,
-}) => {
-  const newContact = new Contact({
-    name,
-    email,
-    phoneNumber,
-    contactType,
-    isFavourite,
-    userId,
-  });
-  await newContact.save();
-  return newContact;
+export const createContactService = async (contactData) => {
+  const contact = await Contact.create(contactData);
+  return contact;
 };
 
 export const updateContactByIdService = async (
-  userId,
   contactId,
+  userId,
   updateData,
 ) => {
-  const updatedContact = await Contact.findOneAndUpdate(
+  const contact = await Contact.findOneAndUpdate(
     { _id: contactId, userId },
     updateData,
-    { new: true },
+    { new: true, includeResultMetadata: true },
   );
 
-  return updatedContact;
+  if (!contact || !contact.value) return null;
+
+  return {
+    contact: contact.value,
+    isNew: Boolean(contact?.lastErrorObject?.upserted),
+  };
 };
 
 export const deleteContactByIdService = async (userId, contactId) => {
-  return await Contact.findOneAndDelete({ _id: contactId, userId });
+  const contact = await Contact.findOneAndDelete({ _id: contactId, userId });
+  return contact;
 };

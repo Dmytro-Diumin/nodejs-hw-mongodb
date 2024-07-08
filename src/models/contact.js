@@ -33,6 +33,9 @@ const contactSchema = new mongoose.Schema(
       enum: ['family', 'friend', 'work', 'other'],
       default: 'other',
     },
+    photo: {
+      type: String,
+    },
   },
   {
     timestamps: true,

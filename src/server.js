@@ -1,16 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { env } from './utils/env.js';
-import { ENV_VARS } from './сontact/index.js';
-import createHttpError from 'http-errors';
-import contactRouter from './routers/contacts.js';
-import authRouter from './routers/auth.js';
+import { ENV_VARS, UPLOAD_DIR } from './сontact/index.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import rootRouter from './routers/index.js';
 
-dotenv.config();
-const PORT = env(ENV_VARS.PORT, 3000);
+const PORT = Number(env(ENV_VARS.PORT, '3000'));
 
 export const setupServer = () => {
   const app = express();
@@ -29,32 +27,10 @@ export const setupServer = () => {
     }),
   );
 
-  app.use('/contacts', contactRouter);
-  app.use('/auth', authRouter);
+  app.use('/uploads', express.static(UPLOAD_DIR));
+  app.use(rootRouter);
 
-  const notFoundHandler = (req, res, next) => {
-    next(createHttpError(404, 'Route not found'));
-  };
-
-  const errorHandler = (err, req, res, next) => {
-    if (err.name === 'CastError') {
-      res.status(400).json({
-        status: 400,
-        message: 'Bad Request',
-        data: {
-          message: `Invalid ${err.path}: ${err.value}`,
-        },
-      });
-    } else {
-      res.status(err.status || 500).json({
-        status: err.status || 500,
-        message: err.message || 'Server error',
-        data: err.data || {},
-      });
-    }
-  };
-
-  app.use(notFoundHandler);
+  app.use('*', notFoundHandler);
   app.use(errorHandler);
 
   app.listen(PORT, () => {

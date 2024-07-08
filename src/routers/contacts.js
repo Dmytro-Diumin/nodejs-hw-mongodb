@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router } from 'express';
 import {
   createContact,
   deleteContact,
@@ -12,12 +12,13 @@ import {
   updateContactSchema,
 } from '../schemas/contactSchemas.js';
 import authenticate from '../middlewares/authenticate.js';
+import { upload } from '../middlewares/multer.js';
 
-const contactRouter = express.Router();
+const contactRouter = Router();
 
 contactRouter.use(authenticate);
 
-const ctrlWrapper = (ctrl) => {
+export const ctrlWrapper = (ctrl) => {
   return async (req, res, next) => {
     try {
       await ctrl(req, res, next);
@@ -33,11 +34,13 @@ contactRouter.get('/:contactId', ctrlWrapper(getContactByIdController));
 
 contactRouter.post(
   '/',
+  upload.single('photo'),
   validateBody(contactSchema),
   ctrlWrapper(createContact),
 );
 contactRouter.patch(
   '/:contactId',
+  upload.single('photo'),
   validateBody(updateContactSchema),
   ctrlWrapper(updateContact),
 );

@@ -8,6 +8,10 @@ import {
 } from '../services/contacts.js';
 import mongoose from 'mongoose';
 import Contact from '../models/contact.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+import { env } from '../utils/env.js';
+import { ENV_VARS } from '../сontact/index.js';
 
 export const getAllContacts = async (req, res, next) => {
   try {
@@ -127,66 +131,63 @@ export const getContactByUserId = async (userId, contactId) => {
   }
 };
 
-export const createContact = async (req, res, next) => {
-  try {
-    const { name, email, phoneNumber, contactType, isFavourite } = req.body;
-    const newContact = await createContactService({
-      name,
-      email,
-      phoneNumber,
-      contactType,
-      isFavourite,
-      userId: req.user._id,
-    });
-    res.status(201).json({
-      status: 201,
-      message: 'Contact created successfully',
-      data: newContact,
-    });
-  } catch (error) {
-    if (error.name === 'ValidationError') {
-      next(createHttpError(400, error.message));
-    } else {
-      next(createHttpError(500, error.message));
-    }
+export const createContact = async (req, res) => {
+  const photo = req.file;
+
+  let photoUrl;
+  const cloudinary = env(ENV_VARS.CLOUDINARY_ENABLED);
+
+  if (cloudinary === 'true') {
+    photoUrl = await saveFileToCloudinary(photo);
+  } else {
+    photoUrl = await saveFileToUploadDir(photo);
   }
+
+  const newContact = await createContactService({
+    ...req.body,
+    userId: req.user._id,
+    photo: photoUrl,
+  });
+
+  res.status(201).json({
+    status: 201,
+    message: 'Contact created successfully',
+    data: newContact,
+  });
 };
 
 export const updateContact = async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
-    const { name, phoneNumber, email, isFavourite, contactType } = req.body;
+  const { contactId } = req.params;
 
-    const updatedContact = await updateContactByIdService(
-      contactId,
-      req.user._id,
-      {
-        name,
-        phoneNumber,
-        email,
-        isFavourite,
-        contactType,
-      },
-    );
+  const photo = req.file;
+  let photoUrl;
 
-    if (!updatedContact) {
-      return next(
-        createHttpError(404, {
-          status: 404,
-          message: 'Contact not found',
-          data: { message: 'Contact not found' },
-        }),
-      );
-    }
+  const cloudinary = env(ENV_VARS.CLOUDINARY_ENABLED);
 
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully patched a contact!',
-      data: updatedContact,
-    });
-  } catch (error) {
-    next(error);
+  if (cloudinary === 'true') {
+    photoUrl = await saveFileToCloudinary(photo);
+  } else {
+    photoUrl = await saveFileToUploadDir(photo);
   }
+
+  const updatedContact = await updateContactByIdService(
+    contactId,
+    req.user._id,
+    {
+      ...req.body,
+      photo: photoUrl,
+    },
+  );
+
+  if (!updatedContact) {
+    return next(createHttpError(404, 'Contact not found'));
+  }
+
+  res.status(200).json({
+    status: 200,
+    message: 'Successfully patched a contact!',
+    data: updatedContact,
+  });
 };
 
 export const deleteContact = async (req, res, next) => {
