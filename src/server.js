@@ -27,6 +27,12 @@ export const setupServer = () => {
     }),
   );
 
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Welcome in contacts',
+    });
+  });
+
   app.use('/uploads', express.static(UPLOAD_DIR));
   app.use(rootRouter);
 
