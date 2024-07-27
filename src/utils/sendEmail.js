@@ -12,10 +12,5 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendEmail = async (options) => {
-  console.log('Sending email with options:', options);
-  const mailOptions = {
-    ...options,
-    text: options.html.replace(/<[^>]*>/g, ''),
-  };
-  return await transporter.sendMail(mailOptions);
+  return await transporter.sendMail(options);
 };
