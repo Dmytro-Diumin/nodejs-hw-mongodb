@@ -10,7 +10,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.js';
 import { env } from '../utils/env.js';
-import { ENV_VARS } from '../сontact/index.js';
 
 const setupSessionCookies = (res, session) => {
   res.cookie('sessionId', session._id, {
@@ -106,11 +105,19 @@ export const resetPassword = async (userData) => {
 };
 
 export const resetPasswordController = async (req, res) => {
-  await resetPassword(req.body);
+  try {
+    await resetPassword(req.body);
 
-  res.status(200).json({
-    status: res.status,
-    message: 'Password has been successfully reset.',
-    data: {},
-  });
+    res.status(200).json({
+      status: 200,
+      message: 'Password has been successfully reset.',
+      data: {},
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: 'Failed to reset password.',
+      error: error.message,
+    });
+  }
 };

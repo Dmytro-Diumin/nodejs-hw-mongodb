@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   registerUser,
   loginUser,
@@ -11,9 +11,9 @@ import { validateBody } from '../middlewares/validateBody.js';
 import { userLoginSchema, userRegisterSchema } from '../schemas/auth.js';
 import { resetEmailSchema } from '../schemas/resetEmailShema.js';
 import { resetPasswordSchema } from '../schemas/resetPasswordSchema.js';
-import { ctrlWrapper } from './contacts.js';
+import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 
-const authRouter = Router();
+const authRouter = express.Router();
 
 authRouter.post(
   '/register',

@@ -3,16 +3,10 @@ import { User } from '../models/user.js';
 import Session from '../models/session.js';
 
 const authenticate = async (req, res, next) => {
-  const authHeader = req.get('Authorization');
+  const token = req.headers.authorization.split(' ')[1];
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return next(createHttpError(401, 'No token provided'));
-  }
-
-  const [bearer, token] = authHeader.split(' ');
-
-  if (bearer !== 'Bearer' || !token) {
-    return next(createHttpError(401, 'Auth header should be of bearer type'));
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
   }
 
   try {

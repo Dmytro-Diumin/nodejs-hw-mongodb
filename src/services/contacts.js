@@ -1,32 +1,38 @@
 import Contact from '../models/contact.js';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import { SORT_ORDER } from '../сontact/index.js';
 
-export const getContactsService = async (
-  userId,
-  page,
-  perPage,
-  sortBy,
-  sortOrder,
-  type,
-  isFavourite,
-) => {
+export const getContactsService = async ({
+  page = 1,
+  perPage = 10,
+  sortBy = '_id',
+  sortOrder = SORT_ORDER.ASC,
+  filter = {},
+}) => {
+  const limit = perPage;
   const skip = (page - 1) * perPage;
-  const sortOptions = {};
-  sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
-  const query = { userId };
-  if (type) {
-    query.contactType = type;
+  const contactsQuery = Contact.find();
+
+  if (filter.type) {
+    contactsQuery.where('contactType').equals(filter.type);
   }
-  if (isFavourite) {
-    query.isFavourite = isFavourite === 'true';
+  if (filter.isFavourite) {
+    contactsQuery.where('isFavourite').equals(filter.isFavourite);
   }
 
-  const [contacts, totalItems] = await Promise.all([
-    Contact.find(query).skip(skip).limit(perPage).sort(sortOptions),
-    Contact.countDocuments(query),
-  ]);
+  const contactsCount = await Contact.find()
+    .merge(contactsQuery)
+    .countDocuments();
 
-  return { contacts, totalItems };
+  const contacts = await contactsQuery
+    .skip(skip)
+    .limit(limit)
+    .sort({ [sortBy]: sortOrder })
+    .exec();
+  const totalItems = calculatePaginationData(contactsCount, page, perPage);
+
+  return { data: contacts, ...totalItems };
 };
 
 export const getContactByIdService = async (userId, contactId) => {

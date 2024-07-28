@@ -1,17 +1,18 @@
-export const errorHandler = (err, req, res) => {
-  if (err.name === 'CastError') {
-    res.status(400).json({
-      status: 400,
-      message: 'Bad Request',
-      data: {
-        message: `Invalid ${err.path}: ${err.value}`,
-      },
+import { HttpError } from 'http-errors';
+
+export const errorHandler = (err, req, res, next) => {
+  if (err instanceof HttpError) {
+    res.status(err.status).json({
+      status: err.status,
+      message: err.name,
+      data: err,
     });
-  } else {
-    res.status(err.status || 500).json({
-      status: err.status || 500,
-      message: err.message || 'Server error',
-      data: err.data || {},
-    });
+    return;
   }
+
+  res.status(500).json({
+    status: 500,
+    message: 'Something went wrong',
+    data: err.message,
+  });
 };

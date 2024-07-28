@@ -11,7 +11,6 @@ export const ENV_VARS = {
   PORT: 'PORT',
   JWT_SECRET: 'JWT_SECRET',
   APP_DOMAIN: 'APP_DOMAIN',
-  CLOUDINARY_ENABLED: 'CLOUDINARY_ENABLED',
 };
 
 export const EMAIL_VARS = {
@@ -22,6 +21,11 @@ export const EMAIL_VARS = {
   SMTP_FROM: 'SMTP_FROM',
 };
 
+export const SORT_ORDER = {
+  ASC: 'asc',
+  DESC: 'desc',
+};
+
 export const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates');
 export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
 export const UPLOAD_DIR = path.join(process.cwd(), 'upload');
@@ -30,4 +34,5 @@ export const CLOUDINARY = {
   CLOUD_NAME: 'CLOUDINARY_CLOUD_NAME',
   API_KEY: 'CLOUDINARY_API_KEY',
   API_SECRET: 'CLOUDINARY_API_SECRET',
+  CLOUD_ENABLED: 'CLOUDINARY_ENABLED',
 };
