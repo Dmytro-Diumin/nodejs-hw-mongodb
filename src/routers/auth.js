@@ -13,7 +13,6 @@ import { resetEmailSchema } from '../schemas/resetEmailShema.js';
 import { resetPasswordSchema } from '../schemas/resetPasswordSchema.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 
-
 const authRouter = express.Router();
 
 authRouter.post(
