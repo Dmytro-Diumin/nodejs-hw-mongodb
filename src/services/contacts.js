@@ -64,7 +64,7 @@ export const updateContactByIdService = async (
   };
 };
 
-export const deleteContactByIdService = async (userId, contactId) => {
-  const contact = await Contact.findOneAndDelete({ _id: contactId, userId });
+export const deleteContactByIdService = async (contactId) => {
+  const contact = await Contact.findByIdAndDelete(contactId);
   return contact;
 };
