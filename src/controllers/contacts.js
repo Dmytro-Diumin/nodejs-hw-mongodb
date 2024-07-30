@@ -148,11 +148,21 @@ export const updateContactController = async (req, res, next) => {
 };
 
 export const deleteContact = async (req, res, next) => {
+  const { contactId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(contactId)) {
+    return next(
+      createHttpError(400, {
+        status: 400,
+        message: 'Invalid contact ID format',
+        data: { message: `Invalid _id: ${contactId}` },
+      }),
+    );
+  }
   try {
-    const { contactId } = req.params;
-    const result = await deleteContactByIdService(req.user._id, contactId);
+    const result = await deleteContactByIdService(contactId);
     if (!result) {
-      throw createHttpError(404, 'Contact not found');
+      return next(createHttpError(404, 'Contact not found'));
     }
 
     res.status(204).send();
