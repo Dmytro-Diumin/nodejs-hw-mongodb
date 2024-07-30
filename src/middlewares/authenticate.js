@@ -3,16 +3,26 @@ import { User } from '../models/user.js';
 import Session from '../models/session.js';
 
 const authenticate = async (req, res, next) => {
-  const token = req.headers.authorization.split(' ')[1];
+  const authHeader = req.get('Authorization');
 
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
+  if (!authHeader) {
+    return next(createHttpError(401, 'Unauthorized'));
   }
-
+  const [bearer, token] = authHeader.split(' ');
+  if (bearer !== 'Bearer' || !token) {
+    next(createHttpError(401, 'Auth header should be of type Bearer'));
+  }
   try {
     const session = await Session.findOne({ accessToken: token });
     if (!session) {
       return next(createHttpError(401, 'Invalid session'));
+    }
+
+    const isAccessTokenExpired =
+      new Date() > new Date(session.accessTokenValidUntil);
+
+    if (isAccessTokenExpired) {
+      next(createHttpError(401, 'Access token expired'));
     }
 
     const user = await User.findById(session.userId);
