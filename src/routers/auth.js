@@ -6,12 +6,15 @@ import {
   logoutUser,
   resetPasswordController,
   requestResetEmailController,
+  loginWithGoogleController,
+  getGoogleOAuthUrlController,
 } from '../controllers/auth.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import { userLoginSchema, userRegisterSchema } from '../schemas/auth.js';
 import { resetEmailSchema } from '../schemas/resetEmailShema.js';
 import { resetPasswordSchema } from '../schemas/resetPasswordSchema.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
+import { loginWithGoogleOAuthSchema } from '../validation/auth.js';
 
 const authRouter = express.Router();
 
@@ -38,6 +41,13 @@ authRouter.post(
   '/reset-pwd',
   validateBody(resetPasswordSchema),
   ctrlWrapper(resetPasswordController),
+);
+authRouter.get('/get-oauth-url', ctrlWrapper(getGoogleOAuthUrlController));
+
+authRouter.post(
+  '/confirm-oauth',
+  validateBody(loginWithGoogleOAuthSchema),
+  ctrlWrapper(loginWithGoogleController),
 );
 
 export default authRouter;
