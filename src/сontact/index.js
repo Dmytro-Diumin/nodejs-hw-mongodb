@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 
 export const MONGODB_VARS = {
   MONGODB_USER: 'MONGODB_USER',
@@ -11,6 +11,8 @@ export const ENV_VARS = {
   PORT: 'PORT',
   JWT_SECRET: 'JWT_SECRET',
   APP_DOMAIN: 'APP_DOMAIN',
+  GOOGLE_AUTH_CLIENT_ID: 'GOOGLE_AUTH_CLIENT_ID',
+  GOOGLE_AUTH_CLIENT_SECRET: 'GOOGLE_AUTH_CLIENT_SECRET',
 };
 
 export const EMAIL_VARS = {
@@ -29,6 +31,7 @@ export const SORT_ORDER = {
 export const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates');
 export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
 export const UPLOAD_DIR = path.join(process.cwd(), 'upload');
+export const SWAGGER_PATH = path.join(process.cwd(), 'docs', 'swagger.json');
 
 export const CLOUDINARY = {
   CLOUD_NAME: 'CLOUDINARY_CLOUD_NAME',

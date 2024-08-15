@@ -1,0 +1,28 @@
+type: object
+required:
+  - name
+  - email
+  - _id
+  - createdAt
+  - updatedAt
+properties:
+  name:
+    type: string
+    example: 'Diumin'
+    description: 'Name of contact'
+  email:
+    type: string
+    example: diumin@gmail.com
+    description: 'Email of contact'
+  _id:
+    type: string
+    description: 'User id'
+    example: '66871788a255952a2c7b0c2c'
+  createdAt:
+    description: 'User`s created data'
+    type: string
+    example: '2024-08-15T17:28:47.356Z'
+  updatedAt:
+    description: 'User`s updated data'
+    type: string
+    example: '2024-08-15T17:28:47.356Z'

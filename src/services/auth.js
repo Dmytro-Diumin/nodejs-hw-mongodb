@@ -10,6 +10,11 @@ import fs from 'node:fs/promises';
 import handlebars from 'handlebars';
 import path from 'path';
 import crypto from 'crypto';
+import { randomBytes } from 'node:crypto';
+import {
+  getFullNameFromGoogleTokenPayload,
+  validateCode,
+} from '../utils/googleOAuth2.js';
 
 const createSession = () => {
   return {
@@ -142,4 +147,27 @@ export const requestResetToken = async (email) => {
       'Failed to send the email, please try again later',
     );
   }
+};
+
+export const loginOrSignupWithGoogle = async (code) => {
+  const loginTicket = await validateCode(code);
+  const payload = loginTicket.getPayload();
+  if (!payload) throw createHttpError(401);
+
+  let user = await User.findOne({ email: payload.email });
+  if (!user) {
+    const password = await bcrypt.hash(randomBytes(10), 10);
+    user = await User.create({
+      email: payload.email,
+      name: getFullNameFromGoogleTokenPayload(payload),
+      password,
+    });
+  }
+
+  const newSession = createSession();
+
+  return await Session.create({
+    userId: user._id,
+    ...newSession,
+  });
 };
