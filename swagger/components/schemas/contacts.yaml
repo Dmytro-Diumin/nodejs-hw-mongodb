@@ -7,19 +7,19 @@ properties:
   userId:
     description: 'Contact id'
     type: string
-    example: 66aa854415469e9dbf6b2f3a
+    example: 66871788a255952a2c7b0c2c
   name:
     description: 'Contact name'
     type: string
-    example: '2876'
+    example: 'Diumin'
   phoneNumber:
     description: 'Contact phone number'
     type: string
-    example: '123456711111'
+    example: '0637561926111'
   email:
     description: 'Contact email'
     type: string
-    example: 'rwtbnty4n@rtb.com'
+    example: 'diumin@gmail.com'
   isFavourite:
     description: 'Is contact is favourite'
     type: boolean
@@ -32,4 +32,4 @@ properties:
   photo:
     description: 'Contact photo'
     type: string
-    example: https://res.cloudinary.com/drqi0clif/image/upload/v1722451292/fvf8hxnsqhi2y4pwq3nw.jpg
+    example: https://res.cloudinary.com/drqi0clif/image/upload/v1723742919/ymqcpc2fxb0i7gaevz8n.jpg
