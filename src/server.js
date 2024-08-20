@@ -7,6 +7,7 @@ import { ENV_VARS, UPLOAD_DIR } from './сontact/index.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import rootRouter from './routers/index.js';
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 
 const PORT = Number(env(ENV_VARS.PORT, '3000'));
 
@@ -34,6 +35,7 @@ export const setupServer = () => {
   });
 
   app.use('/uploads', express.static(UPLOAD_DIR));
+  app.use('/api-docs', swaggerDocs());
   app.use(rootRouter);
 
   app.use('*', notFoundHandler);
