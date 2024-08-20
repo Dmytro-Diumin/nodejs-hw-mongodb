@@ -28,7 +28,7 @@ requestBody:
           token:
             type: string
             description: 'Token for reset password'
-            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Njg3MTc4OGEyNTU5NTJhMmM3YjBjMmMiLCJlbWFpbCI6Im1pY3JvYjIwMTE5NkBnbWFpbC5jb20iLCJpYXQiOjE3MjM3NDk3NDcsImV4cCI6MTcyMzc1MDA0N30.6Q4sCT2u-JQfORV6BCx3JdNEIByi5jzMAESLM_kKFRM'
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Njg3MTc4OGEyNTU5NTJhMmM3YjBjMmMiLCJlbWFpbCI6Im1pY3JvYjIwMTE5NkBnbWFpbC5jb20iLCJpYXQiOjE3MjQxODI4OTIsImV4cCI6MTcyNDE4MzE5Mn0.cRq6-qa6jRCCiweYrIjcVXpY574UuUYetFpcbTbgYxE'
           password:
             type: string
             description: 'New user`s password'

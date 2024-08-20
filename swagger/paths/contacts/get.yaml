@@ -38,7 +38,7 @@ parameters:
     name: type
     schema:
       type: string
-      enum: ['work', 'home', 'personal', 'other']
+      enum: ['work', 'home', 'personal','other']
       example: other
 responses:
   '200':
